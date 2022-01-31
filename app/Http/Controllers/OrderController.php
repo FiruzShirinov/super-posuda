@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\OrderService;
 use App\Traits\ParameterHandler;
+use App\Http\Requests\OrderRequest;
 
 class OrderController extends Controller
 {
@@ -25,9 +26,9 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(OrderService $order)
+    public function store(OrderRequest $request, OrderService $order)
     {
-        $order->postOrdersCreate($this->params());
-        return redirect()->route('orders.create');
+        $message = $order->postOrdersCreate($this->params($request));
+        return redirect()->route('orders.create')->with(['message' => $message ]);
     }
 }

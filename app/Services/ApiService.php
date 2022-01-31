@@ -18,9 +18,13 @@ class ApiService
         $this->parameters['apiKey'] = $this->superPosudaApiKey;
     }
 
-    protected function getRequest(string $path = null)
+    protected function getRequest(string $path = null, ?array $params)
     {
         $url = $this->superPosudaUrl.$path;
+
+        if(!empty($params)){
+            $this->parameters = array_merge($this->parameters, $params);
+        }
 
         try {
             $request = $this->client->get($url, ['query' => $this->parameters]);
@@ -47,7 +51,12 @@ class ApiService
         $url = $this->superPosudaUrl.$path;
 
         try {
-            $request = $this->client->post($url, ['query' => $this->parameters]);
+            $request = $this->client->post($url, [
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded'
+                ],
+                'form_params' => $this->parameters
+            ]);
         } catch(ClientException $e) {
             return $this->parseClientException($e);
         }
@@ -55,7 +64,7 @@ class ApiService
         $response = $request ? $request->getBody() : null;
         $status = $request ? $request->getStatusCode() : 500;
 
-        if ($response && $status === 200 && $response !== 'null') {
+        if ($response && $status === 201 && $response !== 'null') {
             return json_decode($response, true);
         }
 
